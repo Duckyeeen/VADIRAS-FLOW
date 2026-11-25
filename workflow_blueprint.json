@@ -1,0 +1,80 @@
+{
+  "workflow_id": "vadiraflow-tech-service-ops-v1",
+  "version": "1.0.0",
+  "engine": "Python 3.11 + FastAPI Deterministic State Machine",
+  "trigger": {
+    "method": "POST",
+    "path": "/api/v1/requests/ingest"
+  },
+  "steps": [
+    {
+      "id": "step_1_validate_sanitize",
+      "name": "Validate and sanitize inbound request",
+      "owner": "validator",
+      "input": "InboundRequest",
+      "output": "PreprocessedContext"
+    },
+    {
+      "id": "step_2_context_retrieval",
+      "name": "Retrieve relevant knowledge and similar tickets",
+      "owner": "retriever",
+      "input": "PreprocessedContext",
+      "output": "PreprocessedContext with retrieved context"
+    },
+    {
+      "id": "step_3_ai_reasoning",
+      "name": "Classify request and propose actions",
+      "owner": "ai_engine",
+      "input": "InboundRequest and PreprocessedContext",
+      "output": "AIAnalysisOutput"
+    },
+    {
+      "id": "step_4_guardian_control",
+      "name": "Apply deterministic safety and execution policy",
+      "owner": "guardian",
+      "input": "AIAnalysisOutput",
+      "output": "GuardianDecision",
+      "rules": {
+        "min_confidence_auto_execute": 0.80,
+        "high_risk_flags_require_hitl": [
+          "REFUND_REQUEST",
+          "ACCESS_PRIVILEGE_CHANGE",
+          "DATA_DELETION",
+          "SECURITY_BREACH",
+          "PROMPT_INJECTION_SUSPECTED"
+        ],
+        "allowed_auto_actions": [
+          "create_ticket",
+          "send_customer_ack",
+          "request_more_info"
+        ],
+        "blocked_auto_actions": [
+          "process_refund",
+          "delete_user_data",
+          "grant_admin_role"
+        ]
+      }
+    },
+    {
+      "id": "step_5_execution",
+      "name": "Execute permitted actions",
+      "owner": "ticket_connector and notifier",
+      "input": "GuardianDecision and permitted actions",
+      "output": "External execution references"
+    },
+    {
+      "id": "step_6_sla_monitoring",
+      "name": "Monitor service-level deadline",
+      "owner": "sla_watchdog",
+      "input": "WorkflowAuditRecord and demo_sla_seconds",
+      "output": "SLA status"
+    },
+    {
+      "id": "step_7_verification",
+      "name": "Record human or automated resolution verification",
+      "owner": "workflow coordinator",
+      "input": "VerifyResolutionRequest and WorkflowAuditRecord",
+      "output": "Updated WorkflowAuditRecord"
+    }
+  ]
+}
