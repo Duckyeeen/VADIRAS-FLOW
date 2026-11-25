@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pydantic>=2.0
+pydantic-settings
+python-dotenv
+openai
+httpx
+rank-bm25
+pytest
+pytest-asyncio
