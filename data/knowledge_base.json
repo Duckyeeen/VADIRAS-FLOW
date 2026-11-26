@@ -1,0 +1,23 @@
+[
+  {
+    "doc_id": "KB-AUTH-001",
+    "category": "Auth",
+    "title": "Người dùng không đăng nhập được sau khi đổi mật khẩu",
+    "content": "Triệu chứng: người dùng báo lỗi 401 hoặc 'sai thông tin đăng nhập' ngay sau khi đổi mật khẩu. Nguyên nhân thường gặp: token cũ chưa bị thu hồi, hoặc bộ nhớ đệm phiên (session cache) còn lưu mật khẩu cũ. Cách xử lý: thu hồi toàn bộ token của tài khoản, xóa session cache, yêu cầu người dùng đăng nhập lại. Nếu vẫn lỗi, kiểm tra log xác thực xem có bị khóa tạm do nhập sai nhiều lần không.",
+    "owner_team": "Backend-Auth"
+  },
+  {
+    "doc_id": "KB-REP-001",
+    "category": "Reporting",
+    "title": "Xuất báo cáo doanh thu ra Excel bị file trống",
+    "content": "Triệu chứng: bấm xuất Excel, tải về file không có dòng dữ liệu. Nguyên nhân thường gặp: bộ lọc ngày bị lưu cache sai múi giờ, hoặc truy vấn trả về 0 bản ghi do lọc nhầm trạng thái. Cách xử lý: xóa cache bộ lọc, chọn lại khoảng ngày, chạy lại job xuất báo cáo. Nếu báo cáo lớn hơn 100.000 dòng, chia nhỏ theo tháng vì job có thể bị timeout.",
+    "owner_team": "Data-Reporting"
+  },
+  {
+    "doc_id": "KB-BIL-001",
+    "category": "Billing",
+    "title": "Khách bị tính tiền hai lần cho cùng một hóa đơn",
+    "content": "Triệu chứng: khách báo bị trừ tiền hai lần trong cùng một chu kỳ. Nguyên nhân thường gặp: người dùng bấm thanh toán hai lần do mạng chậm, hoặc cổng thanh toán gửi callback lặp. Cách xử lý: đối chiếu mã giao dịch trong hệ thống với cổng thanh toán, xác nhận giao dịch trùng. Việc hoàn tiền phải do nhân viên có thẩm quyền phê duyệt, không tự động hoàn.",
+    "owner_team": "Billing-Ops"
+  }
+]

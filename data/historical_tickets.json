@@ -1,0 +1,26 @@
+[
+  {
+    "ticket_id": "HT-001",
+    "description": "Khi xuất báo cáo doanh thu tháng 10 ra Excel thì file tải về không có dòng nào, dù trên màn hình vẫn thấy số liệu.",
+    "category": "Reporting",
+    "priority": "P3",
+    "assigned_team": "Data-Reporting",
+    "resolution": "Xóa cache bộ lọc ngày và chạy lại job xuất báo cáo. Đã xử lý trong 20 phút."
+  },
+  {
+    "ticket_id": "HT-002",
+    "description": "Nhiều người dùng cùng lúc không đăng nhập được, báo lỗi 500 sau khi hệ thống cập nhật phiên bản mới.",
+    "category": "Auth",
+    "priority": "P1",
+    "assigned_team": "Backend-Auth",
+    "resolution": "Rollback phiên bản cập nhật, sửa lỗi cấu hình kết nối cơ sở dữ liệu, deploy lại."
+  },
+  {
+    "ticket_id": "HT-003",
+    "description": "Nút Lưu trên trang hồ sơ không phản hồi khi dùng trình duyệt Safari.",
+    "category": "Frontend",
+    "priority": "P4",
+    "assigned_team": "Frontend-Web",
+    "resolution": "Sửa lỗi tương thích sự kiện click trên Safari, phát hành bản vá giao diện."
+  }
+]
