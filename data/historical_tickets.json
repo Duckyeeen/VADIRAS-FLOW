@@ -1,26 +1,137 @@
 [
   {
     "ticket_id": "HT-001",
+    "title": "Xuất Excel doanh thu tháng 10 bị file trống",
     "description": "Khi xuất báo cáo doanh thu tháng 10 ra Excel thì file tải về không có dòng nào, dù trên màn hình vẫn thấy số liệu.",
     "category": "Reporting",
-    "priority": "P3",
-    "assigned_team": "Data-Reporting",
+    "priority": "P3_MEDIUM",
+    "assigned_team": "Backend-Reporting",
     "resolution": "Xóa cache bộ lọc ngày và chạy lại job xuất báo cáo. Đã xử lý trong 20 phút."
   },
   {
     "ticket_id": "HT-002",
+    "title": "Nhiều người dùng không đăng nhập được, lỗi 500 sau cập nhật",
     "description": "Nhiều người dùng cùng lúc không đăng nhập được, báo lỗi 500 sau khi hệ thống cập nhật phiên bản mới.",
     "category": "Auth",
-    "priority": "P1",
-    "assigned_team": "Backend-Auth",
-    "resolution": "Rollback phiên bản cập nhật, sửa lỗi cấu hình kết nối cơ sở dữ liệu, deploy lại."
+    "priority": "P1_CRITICAL",
+    "assigned_team": "IAM-Security",
+    "resolution": "Quay lại phiên bản trước (rollback), sửa lỗi cấu hình kết nối cơ sở dữ liệu rồi deploy lại."
   },
   {
     "ticket_id": "HT-003",
+    "title": "Nút Lưu trang hồ sơ không phản hồi trên Safari",
     "description": "Nút Lưu trên trang hồ sơ không phản hồi khi dùng trình duyệt Safari.",
     "category": "Frontend",
-    "priority": "P4",
+    "priority": "P4_LOW",
     "assigned_team": "Frontend-Web",
     "resolution": "Sửa lỗi tương thích sự kiện click trên Safari, phát hành bản vá giao diện."
+  },
+  {
+    "ticket_id": "HT-004",
+    "title": "Khách bị trừ tiền hai lần cho một đơn hàng",
+    "description": "Khách báo trong sao kê có hai khoản trừ giống nhau cho cùng một đơn hàng, cách nhau vài giây.",
+    "category": "Billing",
+    "priority": "P2_HIGH",
+    "assigned_team": "Billing-Ops",
+    "resolution": "Đối chiếu mã giao dịch với cổng thanh toán, xác nhận giao dịch trùng do bấm hai lần. Chuyển quản lý duyệt hoàn tiền cho giao dịch dư."
+  },
+  {
+    "ticket_id": "HT-005",
+    "title": "Mã OTP đăng nhập không về sau 5 phút",
+    "description": "Người dùng yêu cầu mã OTP qua tin nhắn nhưng chờ hơn 5 phút vẫn không nhận được, đã thử gửi lại nhiều lần.",
+    "category": "Auth",
+    "priority": "P3_MEDIUM",
+    "assigned_team": "IAM-Security",
+    "resolution": "Phát hiện tài khoản bị giới hạn tần suất do gửi lại quá nhiều. Chờ hết thời gian khóa rồi gửi lại, hướng dẫn kiểm tra thư rác cho OTP email."
+  },
+  {
+    "ticket_id": "HT-006",
+    "title": "Báo cáo công nợ quý báo timeout",
+    "description": "Báo cáo công nợ cả quý quay vòng rất lâu rồi báo lỗi timeout 504, báo cáo theo tháng thì chạy bình thường.",
+    "category": "Reporting",
+    "priority": "P2_HIGH",
+    "assigned_team": "Backend-Reporting",
+    "resolution": "Thêm chỉ mục (index) cho cột ngày chứng từ, tối ưu truy vấn. Tạm thời hướng dẫn chạy theo từng tháng."
+  },
+  {
+    "ticket_id": "HT-007",
+    "title": "API trả lỗi 500 hàng loạt vào giờ cao điểm",
+    "description": "Từ 9 giờ sáng, nhiều chức năng báo lỗi 500, tỷ lệ lỗi tăng mạnh trên toàn hệ thống, người dùng không thao tác được.",
+    "category": "Core",
+    "priority": "P1_CRITICAL",
+    "assigned_team": "Backend-Core",
+    "resolution": "Phát hiện cạn kết nối cơ sở dữ liệu. Tăng giới hạn connection pool, khởi động lại dịch vụ lỗi, theo dõi thêm 1 giờ."
+  },
+  {
+    "ticket_id": "HT-008",
+    "title": "Trang trắng sau khi đăng nhập ở một số máy",
+    "description": "Một số người dùng đăng nhập xong thấy màn hình trắng, máy khác cùng tài khoản thì bình thường.",
+    "category": "Frontend",
+    "priority": "P3_MEDIUM",
+    "assigned_team": "Frontend-Web",
+    "resolution": "Nguyên nhân là cache trình duyệt giữ bản build cũ. Hướng dẫn xóa cache và tải lại cứng, bổ sung đặt phiên bản cho tệp tĩnh."
+  },
+  {
+    "ticket_id": "HT-009",
+    "title": "Đã thanh toán nhưng chưa nâng cấp được gói",
+    "description": "Khách đã nhận thông báo trừ tiền nhưng tài khoản vẫn hiển thị gói cũ sau hơn 1 giờ.",
+    "category": "Billing",
+    "priority": "P3_MEDIUM",
+    "assigned_team": "Billing-Ops",
+    "resolution": "Giao dịch kẹt ở trạng thái chờ do mất callback. Xác nhận thành công với cổng thanh toán rồi chạy lại bước kích hoạt gói."
+  },
+  {
+    "ticket_id": "HT-010",
+    "title": "Số lượng tồn kho khác nhau giữa hai màn hình",
+    "description": "Màn hình quản lý kho và màn hình bán hàng hiển thị số lượng tồn khác nhau cho cùng một sản phẩm.",
+    "category": "Core",
+    "priority": "P2_HIGH",
+    "assigned_team": "Backend-Core",
+    "resolution": "Hàng đợi đồng bộ bị nghẽn. Xử lý các tác vụ tồn đọng, xóa cache sản phẩm và chạy lại đồng bộ toàn bộ."
+  },
+  {
+    "ticket_id": "HT-011",
+    "title": "Dashboard lệch nhẹ so với báo cáo chi tiết",
+    "description": "Tổng đơn hàng trên dashboard ít hơn báo cáo chi tiết khoảng vài chục đơn trong cùng ngày.",
+    "category": "Reporting",
+    "priority": "P4_LOW",
+    "assigned_team": "Backend-Reporting",
+    "resolution": "Dashboard cập nhật mỗi giờ nên chưa có đơn mới. Giải thích cho người dùng, số liệu tự khớp sau lần cập nhật kế tiếp."
+  },
+  {
+    "ticket_id": "HT-012",
+    "title": "Bị đăng xuất liên tục sau vài phút",
+    "description": "Một người dùng bị đưa về trang đăng nhập sau mỗi vài phút dù đang thao tác, các đồng nghiệp thì không bị.",
+    "category": "Auth",
+    "priority": "P4_LOW",
+    "assigned_team": "IAM-Security",
+    "resolution": "Đồng hồ máy người dùng lệch giờ. Hướng dẫn bật đồng bộ giờ tự động, sau đó đăng nhập lại bình thường."
+  },
+  {
+    "ticket_id": "HT-013",
+    "title": "Hóa đơn hiển thị sai mức thuế",
+    "description": "Một số hóa đơn trong tuần này tính thuế sai so với mức đã cấu hình, tổng tiền cao hơn thực tế.",
+    "category": "Billing",
+    "priority": "P2_HIGH",
+    "assigned_team": "Billing-Ops",
+    "resolution": "Cấu hình thuế bị ghi đè sau khi nhập dữ liệu hàng loạt. Khôi phục cấu hình đúng, phát hành lại các hóa đơn bị ảnh hưởng sau khi kế toán duyệt."
+  },
+  {
+    "ticket_id": "HT-014",
+    "title": "Bảng dữ liệu bị vỡ bố cục trên điện thoại",
+    "description": "Trên điện thoại, bảng danh sách đơn hàng bị tràn ra ngoài màn hình, không cuộn ngang được.",
+    "category": "Frontend",
+    "priority": "P4_LOW",
+    "assigned_team": "Frontend-Web",
+    "resolution": "Bổ sung vùng cuộn ngang cho bảng và chỉnh lại độ rộng cột trên màn hình nhỏ, phát hành bản vá giao diện."
+  },
+  {
+    "ticket_id": "HT-015",
+    "title": "Email thông báo đơn hàng đến chậm vài giờ",
+    "description": "Khách phản ánh email xác nhận đơn hàng đến chậm 2 đến 3 giờ, một số email không đến.",
+    "category": "Core",
+    "priority": "P3_MEDIUM",
+    "assigned_team": "Backend-Core",
+    "resolution": "Hàng đợi gửi email bị tồn đọng do một tiến trình xử lý bị treo. Khởi động lại tiến trình và gửi lại các email chưa đi."
   }
 ]

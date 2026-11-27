@@ -1,0 +1,89 @@
+{
+  "name": "ticket_analysis",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "request_id": { "type": "string" },
+      "is_valid_support_request": { "type": "boolean" },
+      "category": {
+        "type": "string",
+        "enum": [
+          "bug_backend", "bug_frontend", "account_access", "billing_refund",
+          "feature_request", "how_to_question", "out_of_scope_or_spam"
+        ]
+      },
+      "priority": {
+        "type": "string",
+        "enum": ["P1_CRITICAL", "P2_HIGH", "P3_MEDIUM", "P4_LOW"]
+      },
+      "risk_level": {
+        "type": "string",
+        "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+      },
+      "summary": { "type": "string" },
+      "root_cause_hypothesis": { "type": "string" },
+      "missing_information": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "recommended_team": {
+        "type": "string",
+        "enum": [
+          "Backend-Reporting", "Backend-Core", "Frontend-Web", "IAM-Security",
+          "Billing-Ops", "Customer-Success", "Triage-Human"
+        ]
+      },
+      "recommended_workflow_template": {
+        "type": "string",
+        "enum": [
+          "WF_BACKEND_INCIDENT_FASTTRACK", "WF_STANDARD_BUG_TRIAGE",
+          "WF_REQUEST_MORE_INFO", "WF_HIGH_RISK_HUMAN_APPROVAL",
+          "WF_SELF_SERVICE_KB_REPLY", "WF_SAFE_REJECT"
+        ]
+      },
+      "proposed_actions": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "action_type": {
+              "type": "string",
+              "enum": ["create_ticket", "send_reply", "request_more_info", "escalate_to_human"]
+            },
+            "target_system": {
+              "type": "string",
+              "enum": ["github_issues", "email", "internal"]
+            },
+            "ticket_title": { "type": ["string", "null"] },
+            "labels": { "type": "array", "items": { "type": "string" } },
+            "message_draft": { "type": ["string", "null"] }
+          },
+          "required": [
+            "action_type", "target_system", "ticket_title", "labels", "message_draft"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "policy_flags": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "refund_request", "admin_access", "data_deletion",
+            "prompt_injection", "spam", "pii_exposure", "none"
+          ]
+        }
+      },
+      "confidence_score": { "type": "number" },
+      "reasoning_trace": { "type": "string" }
+    },
+    "required": [
+      "request_id", "is_valid_support_request", "category", "priority",
+      "risk_level", "summary", "root_cause_hypothesis", "missing_information",
+      "recommended_team", "recommended_workflow_template", "proposed_actions",
+      "policy_flags", "confidence_score", "reasoning_trace"
+    ],
+    "additionalProperties": false
+  }
+}
