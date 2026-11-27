@@ -1,4 +1,4 @@
-"""SLA status evaluation interface."""
+"""Giao diện kiểm tra thời hạn cam kết xử lý (SLA) của yêu cầu."""
 
 from datetime import datetime
 
@@ -10,9 +10,9 @@ def evaluate_sla(
     audit_record: WorkflowAuditRecord,
     now: datetime | None = None,
 ) -> WorkflowAuditRecord:
-    """Evaluate a request's SLA and return its updated ``WorkflowAuditRecord``.
+    """Đánh giá trạng thái thời hạn xử lý của yêu cầu và cập nhật ``WorkflowAuditRecord``.
 
-    Inputs are the source request and current audit state; ``now`` optionally
-    supplies the timezone-aware evaluation time for deterministic checks.
+    Nhận vào yêu cầu gốc và bản ghi lịch sử trạng thái hiện tại; tham số ``now`` cho phép
+    truyền vào một mốc thời gian có múi giờ để kiểm tra kết quả một cách nhất quán khi thử nghiệm.
     """
     raise NotImplementedError

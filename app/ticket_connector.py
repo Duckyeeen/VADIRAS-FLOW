@@ -1,11 +1,11 @@
-"""External ticket creation interface."""
+"""Giao diện kết nối để tạo phiếu công việc trên hệ thống bên ngoài."""
 
 from .schemas import ExternalReferences, ProposedAction
 
 
 def create_ticket(action: ProposedAction) -> ExternalReferences:
-    """Execute an approved ticket ``ProposedAction`` and return ``ExternalReferences``.
+    """Thực thi hành động tạo phiếu ``ProposedAction`` đã được duyệt và trả về ``ExternalReferences``.
 
-    The output carries the created ticket identifier and URL when available.
+    Kết quả trả về chứa mã phiếu và đường dẫn truy cập trên hệ thống bên ngoài (nếu có).
     """
     raise NotImplementedError

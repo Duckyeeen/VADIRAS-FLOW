@@ -1,11 +1,12 @@
-"""Customer notification interface."""
+"""Giao diện gửi thông báo tới khách hàng hoặc người gửi yêu cầu."""
 
 from .schemas import InboundRequest, ProposedAction
 
 
 def send_notification(request: InboundRequest, action: ProposedAction) -> bool:
-    """Send an approved customer message for an ``InboundRequest``.
+    """Gửi thông báo đã được cho phép đối với yêu cầu ``InboundRequest``.
 
-    ``action`` supplies the target and draft message; return ``True`` when sent.
+    Tham số ``action`` cung cấp đích nhận và nội dung bản nháp; hàm trả về ``True``
+    khi thông báo đã được gửi đi thành công.
     """
     raise NotImplementedError
