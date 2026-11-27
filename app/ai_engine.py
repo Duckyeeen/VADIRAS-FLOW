@@ -231,7 +231,7 @@ def analyze_request(
     request: InboundRequest,
     context: PreprocessedContext,
 ) -> AIAnalysisOutput:
-    """Analyze an ``InboundRequest`` with its ``PreprocessedContext``.
+    """Phân tích yêu cầu ``InboundRequest`` dựa trên ngữ cảnh sạch ``PreprocessedContext``.
 
     Returns the validated structured classification, risk, routing, and proposed
     actions as ``AIAnalysisOutput``. Raises ``AIEngineError`` after 2 failed retries.

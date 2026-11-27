@@ -1,4 +1,4 @@
-"""Shared, validated data contracts for the VADIRAS FLOW API and workflow."""
+"""Bộ cấu trúc dữ liệu dùng chung và đã kiểm tra chặt chẽ cho API và quy trình VADIRAS FLOW."""
 
 from __future__ import annotations
 
@@ -12,10 +12,12 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ContractModel(BaseModel):
-    """Base contract: reject undeclared fields and trim string inputs."""
+    """Mô hình dữ liệu gốc: chặn các trường lạ không khai báo và tự động cắt khoảng trắng dư ở đầu/cuối chuỗi."""
 
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
+
+# --- Nhóm dữ liệu đầu vào khi tiếp nhận yêu cầu ---
 
 class SourceChannel(str, Enum):
     WEB_FORM = "web_form"
@@ -35,6 +37,7 @@ class CustomerInfo(ContractModel):
     contact_email: str = Field(min_length=3, max_length=254)
     tier: CustomerTier
 
+    # Kiểm tra định dạng địa chỉ email liên hệ hợp lệ (có ký tự @ và tên miền)
     @field_validator("contact_email")
     @classmethod
     def validate_contact_email(cls, value: str) -> str:
@@ -58,7 +61,7 @@ class AttachmentMeta(ContractModel):
 
 
 class InboundRequest(ContractModel):
-    """Validated customer request accepted by POST /requests/ingest."""
+    """Dữ liệu yêu cầu từ khách hàng sau khi được kiểm tra hợp lệ tại cổng tiếp nhận POST /requests/ingest."""
 
     request_id: str = Field(default_factory=lambda: str(uuid4()), min_length=1, max_length=64)
     source_channel: SourceChannel
@@ -71,6 +74,7 @@ class InboundRequest(ContractModel):
     attachments_meta: list[AttachmentMeta] = Field(default_factory=list, max_length=20)
     demo_sla_seconds: int = Field(default=45, ge=1, le=604_800)
 
+    # Bắt buộc thời gian gửi yêu cầu phải có thông tin múi giờ rõ ràng (tránh lệch giờ UTC/nội địa)
     @field_validator("submitted_at")
     @classmethod
     def require_timezone(cls, value: datetime) -> datetime:
@@ -78,6 +82,8 @@ class InboundRequest(ContractModel):
             raise ValueError("submitted_at must include a timezone")
         return value
 
+
+# --- Nhóm dữ liệu ngữ cảnh sạch và tài liệu tham khảo trước khi đưa cho AI ---
 
 class RetrievedDocument(ContractModel):
     document_id: str = Field(min_length=1, max_length=128)
@@ -95,7 +101,7 @@ class SimilarTicket(ContractModel):
 
 
 class PreprocessedContext(ContractModel):
-    """Sanitized and enriched context produced before AI reasoning."""
+    """Ngữ cảnh đã được làm sạch, ẩn thông tin nhạy cảm và bổ sung tài liệu trước khi AI phân tích."""
 
     request_id: str = Field(min_length=1, max_length=64)
     idempotency_hash: str = Field(min_length=64, max_length=64)
@@ -107,6 +113,7 @@ class PreprocessedContext(ContractModel):
     retrieved_kb: list[RetrievedDocument] = Field(default_factory=list)
     similar_tickets: list[SimilarTicket] = Field(default_factory=list)
 
+    # Đảm bảo mã chống trùng lặp đúng định dạng chuỗi thập lục phân SHA-256 dài 64 ký tự và chuẩn hóa về chữ thường
     @field_validator("idempotency_hash")
     @classmethod
     def validate_sha256_hash(cls, value: str) -> str:
@@ -114,6 +121,8 @@ class PreprocessedContext(ContractModel):
             raise ValueError("idempotency_hash must be a 64-character SHA-256 hex digest")
         return value.lower()
 
+
+# --- Nhóm dữ liệu kết quả phân tích của AI và quy tắc kiểm soát an toàn ---
 
 class RequestCategory(str, Enum):
     BUG_BACKEND = "bug_backend"
@@ -167,7 +176,7 @@ class ProposedAction(ContractModel):
 
 
 class AIAnalysisOutput(ContractModel):
-    """Structured classification, risk analysis, and proposed actions."""
+    """Kết quả phân loại có cấu trúc, đánh giá rủi ro và các hành động do AI đề xuất."""
 
     request_id: str = Field(min_length=1, max_length=64)
     is_valid_support_request: bool
@@ -200,7 +209,7 @@ class ApprovalStatus(str, Enum):
 
 
 class GuardianDecision(ContractModel):
-    """Deterministic permission decision for proposed AI actions."""
+    """Quyết định kiểm soát quyền theo quy tắc cố định đối với các hành động AI đề xuất."""
 
     request_id: str = Field(min_length=1, max_length=64)
     evaluated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -212,6 +221,7 @@ class GuardianDecision(ContractModel):
     block_reason: str | None = Field(default=None, max_length=2_000)
     permitted_actions: list[ProposedAction] = Field(default_factory=list)
 
+    # Bắt buộc thời điểm đánh giá quy tắc phải gắn múi giờ rõ ràng
     @field_validator("evaluated_at")
     @classmethod
     def require_timezone(cls, value: datetime) -> datetime:
@@ -219,6 +229,8 @@ class GuardianDecision(ContractModel):
             raise ValueError("evaluated_at must include a timezone")
         return value
 
+
+# --- Nhóm dữ liệu theo dõi trạng thái quy trình, chi phí và xác nhận hoàn tất ---
 
 class WorkflowStatus(str, Enum):
     RECEIVED = "RECEIVED"
@@ -259,7 +271,7 @@ class StateTransition(ContractModel):
 
 
 class WorkflowAuditRecord(ContractModel):
-    """Persistable workflow state, timing, cost, and external references."""
+    """Bản ghi lưu trữ trạng thái quy trình, thời gian, chi phí ước tính và liên kết hệ thống ngoài."""
 
     request_id: str = Field(min_length=1, max_length=64)
     status: WorkflowStatus
@@ -270,14 +282,14 @@ class WorkflowAuditRecord(ContractModel):
 
 
 class ApprovalActionRequest(ContractModel):
-    """Human approval or rejection metadata supplied to an approval endpoint."""
+    """Thông tin người duyệt gửi lên khi phê duyệt hoặc từ chối hành động."""
 
     reviewer_name: str = Field(min_length=1, max_length=200)
     comment: str = Field(default="", max_length=5_000)
 
 
 class VerifyResolutionRequest(ContractModel):
-    """Human verification metadata supplied to a resolution endpoint."""
+    """Thông tin xác nhận từ con người gửi lên để chốt kết quả giải quyết yêu cầu."""
 
     verified_by: str = Field(min_length=1, max_length=200)
     resolution_note: str = Field(min_length=1, max_length=5_000)

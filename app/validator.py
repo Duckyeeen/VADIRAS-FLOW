@@ -1,12 +1,13 @@
-"""Request validation, sanitization, and idempotency interface."""
+"""Giao diện kiểm tra hợp lệ, lọc thông tin nhạy cảm và chống xử lý trùng lặp."""
 
 from .schemas import InboundRequest, PreprocessedContext
 
 
 def validate_and_sanitize(request: InboundRequest) -> PreprocessedContext:
-    """Validate an ``InboundRequest`` and return sanitized ``PreprocessedContext``.
+    """Kiểm tra yêu cầu đầu vào ``InboundRequest`` và tạo ngữ cảnh sạch ``PreprocessedContext``.
 
-    The output includes the idempotency hash, duplicate flag, validation findings,
-    PII redactions, and sanitized request text.
+    Hàm này thực hiện kiểm tra các trường bắt buộc, tạo mã băm chống trùng lặp,
+    ẩn các thông tin cá nhân nhạy cảm (như email, số điện thoại) và làm sạch nội dung
+    trước khi đưa sang bước tìm kiếm ngữ cảnh và phân tích AI.
     """
     raise NotImplementedError
