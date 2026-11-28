@@ -1,0 +1,86 @@
+[
+  {
+    "doc_id": "KB-AUTH-001",
+    "category": "Auth",
+    "title": "Người dùng không đăng nhập được sau khi đổi mật khẩu",
+    "content": "Triệu chứng: người dùng báo lỗi 401 hoặc 'sai thông tin đăng nhập' ngay sau khi đổi mật khẩu. Nguyên nhân thường gặp: token cũ chưa bị thu hồi, hoặc bộ nhớ đệm phiên (session cache) còn lưu mật khẩu cũ. Cách xử lý: thu hồi toàn bộ token của tài khoản, xóa session cache, yêu cầu người dùng đăng nhập lại. Nếu vẫn lỗi, kiểm tra log xác thực xem tài khoản có bị khóa tạm do nhập sai nhiều lần không.",
+    "owner_team": "IAM-Security"
+  },
+  {
+    "doc_id": "KB-AUTH-002",
+    "category": "Auth",
+    "title": "Mã OTP không về điện thoại hoặc email",
+    "content": "Triệu chứng: người dùng yêu cầu mã OTP nhưng chờ quá 2 phút không nhận được. Nguyên nhân thường gặp: nhà cung cấp SMS bị chậm, email OTP rơi vào thư rác, hoặc người dùng bấm gửi lại quá nhiều lần nên bị giới hạn tần suất (rate limit). Cách xử lý: kiểm tra trạng thái gửi trong log thông báo, hướng dẫn kiểm tra thư rác, chờ 5 phút rồi mới gửi lại. Nếu lỗi kéo dài trên nhiều tài khoản, chuyển cho đội hạ tầng kiểm tra nhà cung cấp SMS.",
+    "owner_team": "IAM-Security"
+  },
+  {
+    "doc_id": "KB-AUTH-003",
+    "category": "Auth",
+    "title": "Phiên đăng nhập hết hạn liên tục, bị đăng xuất liên tục",
+    "content": "Triệu chứng: người dùng đang thao tác thì bị đưa về trang đăng nhập, lặp lại nhiều lần trong ngày. Nguyên nhân thường gặp: đồng hồ máy người dùng lệch giờ so với máy chủ làm token hết hạn sớm, trình duyệt chặn cookie của bên thứ ba, hoặc cấu hình thời gian sống của token (token expiry) quá ngắn. Cách xử lý: hướng dẫn bật đồng bộ giờ tự động, cho phép cookie của trang, kiểm tra cấu hình token expiry. Nếu chỉ xảy ra với một nhóm người dùng, kiểm tra chính sách phiên theo vai trò.",
+    "owner_team": "IAM-Security"
+  },
+  {
+    "doc_id": "KB-REP-001",
+    "category": "Reporting",
+    "title": "Xuất báo cáo doanh thu ra Excel bị file trống",
+    "content": "Triệu chứng: bấm xuất Excel, tải về file không có dòng dữ liệu. Nguyên nhân thường gặp: bộ lọc ngày bị lưu cache sai múi giờ, hoặc truy vấn trả về 0 bản ghi do lọc nhầm trạng thái. Cách xử lý: xóa cache bộ lọc, chọn lại khoảng ngày, chạy lại job xuất báo cáo. Nếu báo cáo lớn hơn 100.000 dòng, chia nhỏ theo tháng vì job có thể bị timeout.",
+    "owner_team": "Backend-Reporting"
+  },
+  {
+    "doc_id": "KB-REP-002",
+    "category": "Reporting",
+    "title": "Báo cáo chạy rất chậm hoặc báo lỗi timeout",
+    "content": "Triệu chứng: trang báo cáo quay vòng hơn 60 giây rồi báo lỗi timeout hoặc 504. Nguyên nhân thường gặp: khoảng thời gian chọn quá dài, truy vấn thiếu chỉ mục (index) trên cột ngày, hoặc nhiều người cùng chạy báo cáo nặng vào giờ cao điểm. Cách xử lý: thu hẹp khoảng thời gian, chạy báo cáo ngoài giờ cao điểm, nhờ đội dữ liệu kiểm tra kế hoạch truy vấn (query plan) và bổ sung index nếu cần.",
+    "owner_team": "Backend-Reporting"
+  },
+  {
+    "doc_id": "KB-REP-003",
+    "category": "Reporting",
+    "title": "Số liệu trên dashboard không khớp với báo cáo chi tiết",
+    "content": "Triệu chứng: tổng doanh thu trên dashboard khác tổng trong báo cáo chi tiết cùng kỳ. Nguyên nhân thường gặp: dashboard đọc từ bảng tổng hợp cập nhật mỗi giờ nên chưa có dữ liệu mới, hoặc hai nơi dùng quy tắc loại trừ đơn hủy khác nhau. Cách xử lý: đối chiếu thời điểm cập nhật cuối của dashboard, so sánh điều kiện lọc của hai báo cáo, chạy lại job tổng hợp. Nếu chênh lệch lớn hơn 1% sau khi đã đồng bộ, chuyển đội dữ liệu rà soát công thức.",
+    "owner_team": "Backend-Reporting"
+  },
+  {
+    "doc_id": "KB-BIL-001",
+    "category": "Billing",
+    "title": "Khách bị tính tiền hai lần cho cùng một hóa đơn",
+    "content": "Triệu chứng: khách báo bị trừ tiền hai lần trong cùng một chu kỳ. Nguyên nhân thường gặp: người dùng bấm thanh toán hai lần do mạng chậm, hoặc cổng thanh toán gửi callback lặp. Cách xử lý: đối chiếu mã giao dịch trong hệ thống với cổng thanh toán, xác nhận giao dịch trùng. Việc hoàn tiền phải do nhân viên có thẩm quyền phê duyệt, không tự động hoàn.",
+    "owner_team": "Billing-Ops"
+  },
+  {
+    "doc_id": "KB-BIL-002",
+    "category": "Billing",
+    "title": "Đã thanh toán thành công nhưng gói dịch vụ chưa được kích hoạt",
+    "content": "Triệu chứng: khách nhận thông báo trừ tiền nhưng tài khoản vẫn ở gói cũ. Nguyên nhân thường gặp: callback xác nhận từ cổng thanh toán bị mất hoặc đến chậm, giao dịch ở trạng thái chờ xử lý (pending). Cách xử lý: tra mã giao dịch, nếu cổng thanh toán xác nhận thành công thì chạy lại bước kích hoạt gói thủ công. Không tự ý hoàn tiền; mọi trường hợp hoàn tiền phải được người có thẩm quyền duyệt.",
+    "owner_team": "Billing-Ops"
+  },
+  {
+    "doc_id": "KB-FE-001",
+    "category": "Frontend",
+    "title": "Trang trắng hoàn toàn sau khi đăng nhập",
+    "content": "Triệu chứng: đăng nhập xong màn hình trắng, không hiện nội dung, console trình duyệt có lỗi JavaScript. Nguyên nhân thường gặp: bản build mới bị cache cũ của trình duyệt xung đột, hoặc một file JavaScript tải lỗi 404 sau khi deploy. Cách xử lý: hướng dẫn xóa cache và tải lại cứng (hard reload), kiểm tra tab Network xem file nào lỗi 404, xác nhận bản deploy đã đồng bộ đầy đủ tệp tĩnh.",
+    "owner_team": "Frontend-Web"
+  },
+  {
+    "doc_id": "KB-FE-002",
+    "category": "Frontend",
+    "title": "Nút bấm không phản hồi trên trình duyệt Safari",
+    "content": "Triệu chứng: nút Lưu hoặc Gửi không làm gì khi dùng Safari trên Mac hoặc iPhone, trong khi Chrome hoạt động bình thường. Nguyên nhân thường gặp: mã xử lý sự kiện dùng tính năng chưa được Safari hỗ trợ, hoặc kiểu CSS làm phần tử bị phủ lên và chặn thao tác bấm. Cách xử lý: kiểm tra console trên Safari, thử bản Safari mới nhất, chuyển đội giao diện sửa lỗi tương thích.",
+    "owner_team": "Frontend-Web"
+  },
+  {
+    "doc_id": "KB-CORE-001",
+    "category": "Core",
+    "title": "API trả lỗi 500 từng đợt, không ổn định",
+    "content": "Triệu chứng: một số lần gọi API thành công, một số lần trả lỗi 500, không có quy luật rõ ràng. Nguyên nhân thường gặp: cạn kết nối cơ sở dữ liệu (connection pool), một máy chủ trong cụm bị lỗi, hoặc phiên bản mới có lỗi khi gặp dữ liệu đặc biệt. Cách xử lý: kiểm tra log lỗi và tỷ lệ lỗi theo thời gian, xem số kết nối đang dùng, loại máy chủ lỗi khỏi cụm. Nếu lỗi bắt đầu ngay sau lần deploy, cân nhắc quay lại phiên bản trước (rollback).",
+    "owner_team": "Backend-Core"
+  },
+  {
+    "doc_id": "KB-CORE-002",
+    "category": "Core",
+    "title": "Dữ liệu không đồng bộ giữa hai màn hình hoặc hai hệ thống",
+    "content": "Triệu chứng: cùng một bản ghi nhưng hiển thị khác nhau ở hai màn hình, hoặc đã sửa ở nơi này mà nơi kia chưa cập nhật. Nguyên nhân thường gặp: hàng đợi đồng bộ (message queue) bị nghẽn, bộ nhớ đệm chưa được xóa sau khi cập nhật, hoặc hai tiến trình ghi đè lẫn nhau. Cách xử lý: kiểm tra độ trễ của hàng đợi, xóa cache của bản ghi, chạy lại tác vụ đồng bộ. Nếu dữ liệu bị mất hoặc ghi đè sai, báo ngay cho đội xử lý vì cần đối chiếu bản sao lưu.",
+    "owner_team": "Backend-Core"
+  }
+]
