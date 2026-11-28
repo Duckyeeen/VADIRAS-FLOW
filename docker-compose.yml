@@ -1,0 +1,129 @@
+# Hạ tầng chạy thử cục bộ gọn nhẹ gồm đúng 6 dịch vụ cho VADIRAS FLOW
+name: vadiras-flow
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: vadiras-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-vadiras}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vadiras_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-vadiras_flow}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vadiras} -d ${POSTGRES_DB:-vadiras_flow}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  temporal:
+    image: temporalio/auto-setup:1.25.2
+    container_name: vadiras-temporal
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-vadiras}
+      POSTGRES_PWD: ${POSTGRES_PASSWORD:-vadiras_dev_password}
+      POSTGRES_SEEDS: postgres
+    ports:
+      - "7233:7233"
+
+  temporal-ui:
+    image: temporalio/ui:2.31.2
+    container_name: vadiras-temporal-ui
+    restart: unless-stopped
+    depends_on:
+      - temporal
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+    ports:
+      - "8080:8080"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vadiras-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      temporal:
+        condition: service_started
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      DEMO_MODE: ${DEMO_MODE:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://vadiras:vadiras_dev_password@postgres:5432/vadiras_flow}
+      TEMPORAL_ADDRESS: ${TEMPORAL_ADDRESS:-temporal:7233}
+      TEMPORAL_NAMESPACE: ${TEMPORAL_NAMESPACE:-default}
+      TEMPORAL_TASK_QUEUE: ${TEMPORAL_TASK_QUEUE:-vadiras-flow-main}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-chi_dung_cho_phat_trien_cuc_bo_khong_dung_o_moi_truong_that_32ky_tu}
+      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      LLM_MODEL: ${LLM_MODEL:-mock-default}
+      GITHUB_CONNECTOR_MODE: ${GITHUB_CONNECTOR_MODE:-mock}
+      GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET:-chi_dung_kiem_thu_cuc_bo_khong_dung_that}
+      GITHUB_ALLOWED_REPOS: ${GITHUB_ALLOWED_REPOS:-Duckyeeen/VADIRAS-FLOW}
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  temporal-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vadiras-temporal-worker
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+      temporal:
+        condition: service_started
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      DEMO_MODE: ${DEMO_MODE:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://vadiras:vadiras_dev_password@postgres:5432/vadiras_flow}
+      TEMPORAL_ADDRESS: ${TEMPORAL_ADDRESS:-temporal:7233}
+      TEMPORAL_NAMESPACE: ${TEMPORAL_NAMESPACE:-default}
+      TEMPORAL_TASK_QUEUE: ${TEMPORAL_TASK_QUEUE:-vadiras-flow-main}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-chi_dung_cho_phat_trien_cuc_bo_khong_dung_o_moi_truong_that_32ky_tu}
+      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      LLM_MODEL: ${LLM_MODEL:-mock-default}
+      GITHUB_CONNECTOR_MODE: ${GITHUB_CONNECTOR_MODE:-mock}
+      GITHUB_ALLOWED_REPOS: ${GITHUB_ALLOWED_REPOS:-Duckyeeen/VADIRAS-FLOW}
+    command: ["python", "-m", "app.modules.runtime.worker"]
+
+  outbox-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vadiras-outbox-worker
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      DEMO_MODE: ${DEMO_MODE:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://vadiras:vadiras_dev_password@postgres:5432/vadiras_flow}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-chi_dung_cho_phat_trien_cuc_bo_khong_dung_o_moi_truong_that_32ky_tu}
+    command: ["python", "-m", "app.modules.observability.outbox"]
+
+volumes:
+  postgres_data:

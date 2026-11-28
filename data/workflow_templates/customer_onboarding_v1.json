@@ -1,0 +1,51 @@
+{
+  "workflow_id": "tpl-customer-onboarding-v1",
+  "version": 1,
+  "name": "Quy trình Tiếp nhận Khách hàng Mới v1",
+  "description": "Phối hợp song song Sản phẩm và Bảo mật, qua bước duyệt và xác minh đủ hạng mục bàn giao.",
+  "domain_pack": "enterprise_core",
+  "request_type": "ONBOARDING",
+  "nodes": [
+    {"id": "n1_trigger", "type": "TRIGGER", "name": "Tiếp nhận khách hàng mới", "config": {"source": "api"}},
+    {"id": "n2_classify", "type": "CLASSIFY", "name": "Kiểm tra hồ sơ tiếp nhận", "config": {"request_type": "ONBOARDING"}},
+    {
+      "id": "n3_product_task",
+      "type": "HUMAN_TASK",
+      "name": "Sản phẩm thiết lập không gian làm việc",
+      "config": {"department_code": "PRODUCT", "title": "Cấu hình sản phẩm cho khách hàng"}
+    },
+    {
+      "id": "n4_security_task",
+      "type": "HUMAN_TASK",
+      "name": "An toàn thông tin kiểm tra quyền truy cập",
+      "config": {"department_code": "SECURITY", "title": "Rà soát quyền khách hàng mới"}
+    },
+    {
+      "id": "n5_approval",
+      "type": "APPROVAL",
+      "name": "Quản lý xác nhận bàn giao",
+      "config": {"required_role": "department_manager", "approval_timeout_hours": 24}
+    },
+    {
+      "id": "n6_verify",
+      "type": "VERIFICATION",
+      "name": "Đối chiếu đủ danh mục bàn giao",
+      "config": {
+        "evaluator_type": "DETERMINISTIC_FIRST",
+        "require_read_back": true,
+        "postconditions": ["all_onboarding_tasks_completed", "customer_visible_summary_ready"],
+        "evidence_sources": ["human_task_record", "approval_record"]
+      }
+    },
+    {"id": "n7_end", "type": "END", "name": "Hoàn tất tiếp nhận khách hàng", "config": {"expected_outcome": "VERIFIED"}}
+  ],
+  "edges": [
+    {"id": "e1", "source": "n1_trigger", "target": "n2_classify"},
+    {"id": "e2", "source": "n2_classify", "target": "n3_product_task"},
+    {"id": "e3", "source": "n2_classify", "target": "n4_security_task"},
+    {"id": "e4", "source": "n3_product_task", "target": "n5_approval"},
+    {"id": "e5", "source": "n4_security_task", "target": "n5_approval"},
+    {"id": "e6", "source": "n5_approval", "target": "n6_verify"},
+    {"id": "e7", "source": "n6_verify", "target": "n7_end"}
+  ]
+}

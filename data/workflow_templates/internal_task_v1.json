@@ -1,0 +1,44 @@
+{
+  "workflow_id": "tpl-internal-task-v1",
+  "version": 1,
+  "name": "Quy trình Điều phối Công việc Nội bộ Liên phòng ban v1",
+  "description": "Chia tác vụ song song cho Kỹ thuật và Vận hành rồi kiểm chứng hoàn tất toàn bộ đầu việc.",
+  "domain_pack": "enterprise_core",
+  "request_type": "INTERNAL_TASK",
+  "nodes": [
+    {"id": "n1_trigger", "type": "TRIGGER", "name": "Tiếp nhận việc nội bộ", "config": {"source": "api"}},
+    {"id": "n2_classify", "type": "CLASSIFY", "name": "Xác định phòng ban phối hợp", "config": {"request_type": "INTERNAL_TASK"}},
+    {
+      "id": "n3_eng_task",
+      "type": "HUMAN_TASK",
+      "name": "Kỹ thuật thực hiện phần việc",
+      "config": {"department_code": "ENGINEERING", "title": "Hoàn thành hạng mục kỹ thuật nội bộ"}
+    },
+    {
+      "id": "n4_ops_task",
+      "type": "HUMAN_TASK",
+      "name": "Vận hành rà soát tài liệu trực",
+      "config": {"department_code": "DEVOPS", "title": "Cập nhật sổ tay vận hành"}
+    },
+    {
+      "id": "n5_verify",
+      "type": "VERIFICATION",
+      "name": "Kiểm chứng hoàn thành tất cả đầu việc con",
+      "config": {
+        "evaluator_type": "DETERMINISTIC_FIRST",
+        "require_read_back": true,
+        "postconditions": ["all_subtasks_completed"],
+        "evidence_sources": ["human_task_record"]
+      }
+    },
+    {"id": "n6_end", "type": "END", "name": "Kết thúc điều phối nội bộ", "config": {"expected_outcome": "VERIFIED"}}
+  ],
+  "edges": [
+    {"id": "e1", "source": "n1_trigger", "target": "n2_classify"},
+    {"id": "e2", "source": "n2_classify", "target": "n3_eng_task"},
+    {"id": "e3", "source": "n2_classify", "target": "n4_ops_task"},
+    {"id": "e4", "source": "n3_eng_task", "target": "n5_verify"},
+    {"id": "e5", "source": "n4_ops_task", "target": "n5_verify"},
+    {"id": "e6", "source": "n5_verify", "target": "n6_end"}
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "workflow_id": "tpl-change-request-v1",
+  "version": 1,
+  "name": "Quy trình Yêu cầu Thay đổi Có Cổng Phê duyệt v1",
+  "description": "Đánh giá tác động bảo mật, bắt buộc duyệt từ Quản lý trước thao tác ngoài và xác minh kết quả.",
+  "domain_pack": "enterprise_core",
+  "request_type": "CHANGE",
+  "input_schema": ["request_id", "title", "sanitized_description", "request_type", "priority"],
+  "output_schema": ["verification_outcome", "evidence_refs"],
+  "limits": {
+    "max_nodes": 20,
+    "max_duration_seconds": 86400,
+    "max_retries": 3,
+    "max_parallelism": 4,
+    "max_estimated_cost_usd": 2.0,
+    "max_replans": 2
+  },
+  "nodes": [
+    {
+      "id": "n1_trigger",
+      "type": "TRIGGER",
+      "name": "Tiếp nhận yêu cầu thay đổi",
+      "config": {"source": "api"}
+    },
+    {
+      "id": "n2_classify",
+      "type": "CLASSIFY",
+      "name": "Phân loại thay đổi",
+      "config": {"request_type": "CHANGE", "require_completeness_check": true}
+    },
+    {
+      "id": "n3_risk_analysis",
+      "type": "AI_ANALYSIS",
+      "name": "Đánh giá tác động kỹ thuật và bảo mật",
+      "config": {"roles": ["technical_analyst", "security_risk_analyst"], "max_rounds": 1}
+    },
+    {
+      "id": "n4_approval",
+      "type": "APPROVAL",
+      "name": "Cổng phê duyệt thay đổi rủi ro cao",
+      "config": {
+        "required_role": "department_manager",
+        "approval_timeout_hours": 24,
+        "reason_template": "Yêu cầu phê duyệt thay đổi cấu hình trước khi thực thi."
+      },
+      "input_mapping": {"risk": "n3_risk_analysis.risk_level"}
+    },
+    {
+      "id": "n5_action",
+      "type": "CONNECTOR_ACTION",
+      "name": "Ghi nhận yêu cầu thay đổi trên GitHub",
+      "config": {
+        "connector": "mock_github",
+        "action": "create_issue",
+        "target_repository": "Duckyeeen/VADIRAS-FLOW",
+        "parameters": {"labels": ["change-request", "approved"]}
+      },
+      "input_mapping": {"approval_status": "n4_approval.approval_status"},
+      "required_capabilities": ["mock_github:create_issue"],
+      "resource_scope": "github:repo:Duckyeeen/VADIRAS-FLOW",
+      "risk_class": "HIGH"
+    },
+    {
+      "id": "n6_verify",
+      "type": "VERIFICATION",
+      "name": "Xác minh đối chiếu thay đổi",
+      "config": {
+        "evaluator_type": "DETERMINISTIC_FIRST",
+        "require_read_back": true,
+        "postconditions": ["issue_created_with_approved_label", "approval_reference_recorded"],
+        "evidence_sources": ["github_issue_readback", "approval_record"],
+        "freshness_seconds": 300
+      },
+      "input_mapping": {"external_id": "n5_action.external_id"}
+    },
+    {
+      "id": "n7_end",
+      "type": "END",
+      "name": "Kết thúc yêu cầu thay đổi",
+      "config": {"expected_outcome": "VERIFIED"}
+    }
+  ],
+  "edges": [
+    {"id": "e1", "source": "n1_trigger", "target": "n2_classify"},
+    {"id": "e2", "source": "n2_classify", "target": "n3_risk_analysis"},
+    {"id": "e3", "source": "n3_risk_analysis", "target": "n4_approval"},
+    {
+      "id": "e4",
+      "source": "n4_approval",
+      "target": "n5_action",
+      "condition": {"op": "eq", "field": "approval_status", "value": "APPROVED"},
+      "label": "Đã duyệt"
+    },
+    {"id": "e5", "source": "n5_action", "target": "n6_verify"},
+    {"id": "e6", "source": "n6_verify", "target": "n7_end"}
+  ]
+}
