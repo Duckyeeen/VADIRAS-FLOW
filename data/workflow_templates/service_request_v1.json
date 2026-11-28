@@ -1,0 +1,43 @@
+{
+  "workflow_id": "tpl-service-request-v1",
+  "version": 1,
+  "name": "Quy trình Yêu cầu Dịch vụ Hỗ trợ v1",
+  "description": "Định tuyến về phòng Hỗ trợ, giao đầu việc cho nhân sự, gửi phản hồi khách hàng và xác minh.",
+  "domain_pack": "enterprise_core",
+  "request_type": "SERVICE_REQUEST",
+  "nodes": [
+    {"id": "n1_trigger", "type": "TRIGGER", "name": "Tiếp nhận yêu cầu dịch vụ", "config": {"source": "api"}},
+    {"id": "n2_classify", "type": "CLASSIFY", "name": "Xếp loại dịch vụ", "config": {"request_type": "SERVICE_REQUEST"}},
+    {
+      "id": "n3_human_task",
+      "type": "HUMAN_TASK",
+      "name": "Nhân viên Hỗ trợ xử lý yêu cầu",
+      "config": {"department_code": "SUPPORT", "title": "Thực hiện yêu cầu dịch vụ của người dùng"}
+    },
+    {
+      "id": "n4_notify",
+      "type": "NOTIFICATION",
+      "name": "Thông báo kết quả tới người yêu cầu",
+      "config": {"audience": "CUSTOMER_VISIBLE", "channel": "in_app", "template_code": "service_completed"}
+    },
+    {
+      "id": "n5_verify",
+      "type": "VERIFICATION",
+      "name": "Kiểm chứng bằng chứng hoàn tất dịch vụ",
+      "config": {
+        "evaluator_type": "DETERMINISTIC_FIRST",
+        "require_read_back": true,
+        "postconditions": ["human_task_completed_with_note"],
+        "evidence_sources": ["human_task_record"]
+      }
+    },
+    {"id": "n6_end", "type": "END", "name": "Kết thúc yêu cầu dịch vụ", "config": {"expected_outcome": "VERIFIED"}}
+  ],
+  "edges": [
+    {"id": "e1", "source": "n1_trigger", "target": "n2_classify"},
+    {"id": "e2", "source": "n2_classify", "target": "n3_human_task"},
+    {"id": "e3", "source": "n3_human_task", "target": "n4_notify"},
+    {"id": "e4", "source": "n4_notify", "target": "n5_verify"},
+    {"id": "e5", "source": "n5_verify", "target": "n6_end"}
+  ]
+}
