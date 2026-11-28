@@ -1,4 +1,4 @@
-"""Shared, validated data contracts for the VADIRAS FLOW API and workflow."""
+"""Bộ cấu trúc dữ liệu tương thích ngược cho các bộ chuyển đổi tại `app/adapters/`."""
 
 from __future__ import annotations
 
@@ -8,13 +8,9 @@ from enum import Enum
 from typing import Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import Field, field_validator
 
-
-class ContractModel(BaseModel):
-    """Base contract: reject undeclared fields and trim string inputs."""
-
-    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+from app.core.schemas import ContractModel
 
 
 class SourceChannel(str, Enum):
@@ -58,7 +54,7 @@ class AttachmentMeta(ContractModel):
 
 
 class InboundRequest(ContractModel):
-    """Validated customer request accepted by POST /requests/ingest."""
+    """Dữ liệu yêu cầu từ khách hàng dùng cho bộ chuyển đổi tương thích cũ."""
 
     request_id: str = Field(default_factory=lambda: str(uuid4()), min_length=1, max_length=64)
     source_channel: SourceChannel
@@ -95,7 +91,7 @@ class SimilarTicket(ContractModel):
 
 
 class PreprocessedContext(ContractModel):
-    """Sanitized and enriched context produced before AI reasoning."""
+    """Ngữ cảnh đã được làm sạch và bổ sung tài liệu tham khảo."""
 
     request_id: str = Field(min_length=1, max_length=64)
     idempotency_hash: str = Field(min_length=64, max_length=64)
@@ -167,7 +163,7 @@ class ProposedAction(ContractModel):
 
 
 class AIAnalysisOutput(ContractModel):
-    """Structured classification, risk analysis, and proposed actions."""
+    """Kết quả phân loại có cấu trúc, đánh giá rủi ro và các hành động do AI đề xuất."""
 
     request_id: str = Field(min_length=1, max_length=64)
     is_valid_support_request: bool
@@ -200,7 +196,7 @@ class ApprovalStatus(str, Enum):
 
 
 class GuardianDecision(ContractModel):
-    """Deterministic permission decision for proposed AI actions."""
+    """Quyết định kiểm soát quyền theo quy tắc cố định đối với các hành động AI đề xuất."""
 
     request_id: str = Field(min_length=1, max_length=64)
     evaluated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -259,7 +255,7 @@ class StateTransition(ContractModel):
 
 
 class WorkflowAuditRecord(ContractModel):
-    """Persistable workflow state, timing, cost, and external references."""
+    """Bản ghi lưu trữ trạng thái quy trình, thời gian, chi phí ước tính và liên kết hệ thống ngoài."""
 
     request_id: str = Field(min_length=1, max_length=64)
     status: WorkflowStatus
@@ -270,14 +266,14 @@ class WorkflowAuditRecord(ContractModel):
 
 
 class ApprovalActionRequest(ContractModel):
-    """Human approval or rejection metadata supplied to an approval endpoint."""
+    """Thông tin người duyệt gửi lên khi phê duyệt hoặc từ chối hành động."""
 
     reviewer_name: str = Field(min_length=1, max_length=200)
     comment: str = Field(default="", max_length=5_000)
 
 
 class VerifyResolutionRequest(ContractModel):
-    """Human verification metadata supplied to a resolution endpoint."""
+    """Thông tin xác nhận từ con người gửi lên để chốt kết quả giải quyết yêu cầu."""
 
     verified_by: str = Field(min_length=1, max_length=200)
     resolution_note: str = Field(min_length=1, max_length=5_000)
